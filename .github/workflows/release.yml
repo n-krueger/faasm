@@ -8,6 +8,12 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_run:
+    workflows: ["Tests"]
+    branches:
+      - serverless-mpi-dev
+    types:
+      - completed
 
 jobs:
   clean:
@@ -23,23 +29,30 @@ jobs:
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+        run: |
+          if [[ $GITHUB_REF = "refs/heads/serverless-mpi-dev" ]]
+          then
+            echo "TAG_VERSION=serverless-mpi-dev" >> $GITHUB_ENV
+          else
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+          fi
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v1
-      - name: "Log in to DockerHub"
+      - name: "Log in to GHCR"
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: "Build redis container"
         uses: docker/build-push-action@v2
         with:
           push: true
           file: docker/redis.dockerfile
           context: .
-          tags: faasm/redis:${{ env.TAG_VERSION }}
+          tags: ghcr.io/n-krueger/faasm/redis:${{ env.TAG_VERSION }}
 
   build-base:
     needs: clean
@@ -48,16 +61,23 @@ jobs:
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+        run: |
+          if [[ $GITHUB_REF = "refs/heads/serverless-mpi-dev" ]]
+          then
+            echo "TAG_VERSION=serverless-mpi-dev" >> $GITHUB_ENV
+          else
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+          fi
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v1
-      - name: "Log in to DockerHub"
+      - name: "Log in to GHCR"
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: "Build base container"
         uses: docker/build-push-action@v2
         with:
@@ -65,7 +85,7 @@ jobs:
           file: docker/base.dockerfile
           build-args: FAASM_VERSION=${{ env.TAG_VERSION }}
           context: .
-          tags: faasm/base:${{ env.TAG_VERSION }}
+          tags: ghcr.io/n-krueger/faasm/base:${{ env.TAG_VERSION }}
 
   build-cli:
     needs: build-base
@@ -74,16 +94,23 @@ jobs:
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+        run: |
+          if [[ $GITHUB_REF = "refs/heads/serverless-mpi-dev" ]]
+          then
+            echo "TAG_VERSION=serverless-mpi-dev" >> $GITHUB_ENV
+          else
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+          fi
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v1
-      - name: "Log in to DockerHub"
+      - name: "Log in to GHCR"
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: "Build CLI container"
         uses: docker/build-push-action@v2
         with:
@@ -91,7 +118,7 @@ jobs:
           file: docker/cli.dockerfile
           build-args: FAASM_VERSION=${{ env.TAG_VERSION }}
           context: .
-          tags: faasm/cli:${{ env.TAG_VERSION }}
+          tags: ghcr.io/n-krueger/faasm/cli:${{ env.TAG_VERSION }}
 
   build-worker:
     needs: build-base
@@ -100,16 +127,23 @@ jobs:
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+        run: |
+          if [[ $GITHUB_REF = "refs/heads/serverless-mpi-dev" ]]
+          then
+            echo "TAG_VERSION=serverless-mpi-dev" >> $GITHUB_ENV
+          else
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+          fi
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v1
-      - name: "Log in to DockerHub"
+      - name: "Log in to GHCR"
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: "Build worker container"
         uses: docker/build-push-action@v2
         with:
@@ -117,7 +151,7 @@ jobs:
           file: docker/worker.dockerfile
           build-args: FAASM_VERSION=${{ env.TAG_VERSION }}
           context: .
-          tags: faasm/worker:${{ env.TAG_VERSION }}
+          tags: ghcr.io/n-krueger/faasm/worker:${{ env.TAG_VERSION }}
 
   build-upload:
     needs: build-base
@@ -126,16 +160,23 @@ jobs:
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+        run: |
+          if [[ $GITHUB_REF = "refs/heads/serverless-mpi-dev" ]]
+          then
+            echo "TAG_VERSION=serverless-mpi-dev" >> $GITHUB_ENV
+          else
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v*}" >> $GITHUB_ENV
+          fi
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v1
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v1
-      - name: "Log in to DockerHub"
+      - name: "Log in to GHCR"
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
       - name: "Build upload container"
         uses: docker/build-push-action@v2
         with:
@@ -143,4 +184,4 @@ jobs:
           file: docker/upload.dockerfile
           build-args: FAASM_VERSION=${{ env.TAG_VERSION }}
           context: .
-          tags: faasm/upload:${{ env.TAG_VERSION }}
+          tags: ghcr.io/n-krueger/faasm/upload:${{ env.TAG_VERSION }}
