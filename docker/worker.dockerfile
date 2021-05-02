@@ -1,5 +1,5 @@
 ARG FAASM_VERSION
-FROM faasm/base:${FAASM_VERSION}
+FROM ghcr.io/n-krueger/faasm/base:${FAASM_VERSION}
 
 COPY . /usr/local/code/faasm
 
