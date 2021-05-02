@@ -112,12 +112,6 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - name: "Fetch ref"
-        run: git fetch origin ${GITHUB_REF}:ci-branch
-      - name: "Check out branch"
-        run: git checkout --force ci-branch
-      - name: "Update faabric submodule"
-        run: git submodule update faabric
       # --- Get artifacts from other steps ---
       - name: "Download CPP wasm"
         uses: actions/download-artifact@v2
