@@ -58,6 +58,13 @@ jobs:
     needs: clean
     runs-on: ubuntu-20.04
     steps:
+      - name: Maximize build disk space
+        uses: easimon/maximize-build-space@v4
+        with:
+          root-reserve-mb: 40960
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
       - name: "Get the code"
         uses: actions/checkout@v2
       - name: "Get tag version"
