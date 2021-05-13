@@ -1,4 +1,4 @@
-#include <thread>
+#include <sched.h>
 
 #include <faabric/util/logging.h>
 
@@ -16,8 +16,13 @@ int main()
 
     // Determine maximum concurrency on this node, int cast because FaasletPool constructor
     // requires int. If cast overflows or the number of supported threads is undefined we
-    // set them to 0 to suppor the default MPI world size.
-    int nAvailableThreads = (int) std::thread::hardware_concurrency();
+    // set them to 5 to support the default MPI world size.
+    cpu_set_t set;
+    unsigned long count = 0;
+
+    if (sched_getaffinity (0, sizeof (set), &set) == 0)
+        count = CPU_COUNT (&set);
+    int nAvailableThreads = (int) count;
     if (nAvailableThreads <= 0) {
         nAvailableThreads = 5;
     }

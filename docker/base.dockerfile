@@ -18,6 +18,9 @@ COPY --from=python /usr/local/faasm/runtime_root /usr/local/faasm/runtime_root
 COPY --from=sgx /opt/intel /opt/intel
 RUN apt install -y nasm
 
+# Install numactl for NUMA experiments
+RUN apt install -y numactl
+
 # Check out code (clean beforehand just in case)
 WORKDIR /usr/local/code
 RUN rm -rf faasm
